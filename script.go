@@ -85,8 +85,8 @@ func File(path string) *Pipe {
 // the initial directory. For example, if the directory looks like this:
 //
 //	test/
-//	        1.txt
-//	        2.txt
+//		1.txt
+//		2.txt
 //
 // the pipe's output will be:
 //

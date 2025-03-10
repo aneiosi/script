@@ -1132,7 +1132,11 @@ func TestSHA256Sums_OutputsCorrectHashForEachSpecifiedFile(t *testing.T) {
 		// To get the checksum run: openssl dgst -sha256 <file_name>
 		{"testdata/hashSum.input.txt", "1870478d23b0b4db37735d917f4f0ff9393dd3e52d8b0efa852ab85536ddad8e\n"},
 		{"testdata/hello.txt", "b94d27b9934d3e08a52e52d7da7dabfac484efe37a5380ee9088f7ace2efcde9\n"},
-		{"testdata/multiple_files", "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\ne3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\ne3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\n"},
+		{"testdata/multiple_files", strings.Join([]string{
+			"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+			"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+			"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\n",
+		}, "\n")},
 	}
 	for _, tc := range tcs {
 		got, err := script.ListFiles(tc.testFileName).SHA256Sums().String()
@@ -1224,7 +1228,11 @@ func TestExecRunsGoHelpAndGetsUsageMessage(t *testing.T) {
 
 func TestFileOutputsContentsOfSpecifiedFile(t *testing.T) {
 	t.Parallel()
-	want := "This is the first line in the file.\nHello, world.\nThis is another line in the file.\n"
+	want := strings.Join([]string{
+		"This is the first line in the file.",
+		"Hello, world.",
+		"This is another line in the file.\n",
+	}, "\n")
 	got, err := script.File("testdata/test.txt").String()
 	if err != nil {
 		t.Fatal(err)
@@ -1250,7 +1258,11 @@ func TestFindFiles_ReturnsListOfFiles(t *testing.T) {
 	}
 	p.SetError(nil) // else p.String() would be a no-op
 	// Expect result to use this platform's path separator
-	want := filepath.Clean("testdata/multiple_files/1.txt\ntestdata/multiple_files/2.txt\ntestdata/multiple_files/3.tar.zip\n")
+	want := strings.Join([]string{
+		filepath.Clean("testdata/multiple_files/1.txt"),
+		filepath.Clean("testdata/multiple_files/2.txt"),
+		filepath.Clean("testdata/multiple_files/3.tar.zip\n"),
+	}, "\n")
 	got, err := p.String()
 	if err != nil {
 		t.Fatal(err)
@@ -1268,7 +1280,14 @@ func TestFindFiles_RecursesIntoSubdirectories(t *testing.T) {
 	}
 	p.SetError(nil) // else p.String() would be a no-op
 	// Expect result to use this platform's path separator
-	want := filepath.Clean("testdata/multiple_files_with_subdirectory/1.txt\ntestdata/multiple_files_with_subdirectory/2.txt\ntestdata/multiple_files_with_subdirectory/3.tar.zip\ntestdata/multiple_files_with_subdirectory/dir/.hidden\ntestdata/multiple_files_with_subdirectory/dir/1.txt\ntestdata/multiple_files_with_subdirectory/dir/2.txt\n")
+	want := strings.Join([]string{
+		filepath.Clean("testdata/multiple_files_with_subdirectory/1.txt"),
+		filepath.Clean("testdata/multiple_files_with_subdirectory/2.txt"),
+		filepath.Clean("testdata/multiple_files_with_subdirectory/3.tar.zip"),
+		filepath.Clean("testdata/multiple_files_with_subdirectory/dir/.hidden"),
+		filepath.Clean("testdata/multiple_files_with_subdirectory/dir/1.txt"),
+		filepath.Clean("testdata/multiple_files_with_subdirectory/dir/2.txt\n"),
+	}, "\n")
 	got, err := p.String()
 	if err != nil {
 		t.Fatal(err)
@@ -1586,7 +1605,11 @@ func TestSliceSink_(t *testing.T) {
 	}{
 		{
 			name: "returns three elements for three lines of input",
-			pipe: script.Echo("testdata/multiple_files/1.txt\ntestdata/multiple_files/2.txt\ntestdata/multiple_files/3.tar.zip\n"),
+			pipe: script.Echo(strings.Join([]string{
+				"testdata/multiple_files/1.txt",
+				"testdata/multiple_files/2.txt",
+				"testdata/multiple_files/3.tar.zip\n",
+			}, "\n")),
 			want: []string{
 				"testdata/multiple_files/1.txt",
 				"testdata/multiple_files/2.txt",
@@ -2050,7 +2073,10 @@ func TestHash_OutputsCorrectHash(t *testing.T) {
 			name:   "for short string with SHA 512 hasher",
 			input:  "hello, world",
 			hasher: sha512.New(),
-			want:   "8710339dcb6814d0d9d2290ef422285c9322b7163951f9a0ca8f883d3305286f44139aa374848e4174f5aada663027e4548637b6d19894aec4fb6c46a139fbf9",
+			want: strings.Join([]string{
+				"8710339dcb6814d0d9d2290ef422285c9322b7163951f9a0ca8f883d3305286f",
+				"44139aa374848e4174f5aada663027e4548637b6d19894aec4fb6c46a139fbf9",
+			}, ""),
 		},
 		{
 			name:   "for string containing newline with SHA 256 hasher",
@@ -2088,7 +2114,10 @@ func TestHashSums_OutputsCorrectHashForEachSpecifiedFile(t *testing.T) {
 		{
 			testFileName: "testdata/hashSum.input.txt",
 			hasher:       sha512.New(),
-			want:         "3543bd0d68129e860598ccabcee1beb6bb90d91105cea74a8e555588634ec6f6d6d02033139972da2dc4929b1fb61bd24c91c8e82054e9ae865cf7f70909be8c\n",
+			want: strings.Join([]string{
+				"3543bd0d68129e860598ccabcee1beb6bb90d91105cea74a8e555588634ec6f6",
+				"d6d02033139972da2dc4929b1fb61bd24c91c8e82054e9ae865cf7f70909be8c\n",
+			}, ""),
 		},
 		{
 			testFileName: "testdata/hello.txt",
@@ -2098,7 +2127,11 @@ func TestHashSums_OutputsCorrectHashForEachSpecifiedFile(t *testing.T) {
 		{
 			testFileName: "testdata/multiple_files",
 			hasher:       sha256.New(),
-			want:         "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\ne3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\ne3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\n",
+			want: strings.Join([]string{
+				"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+				"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+				"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\n",
+			}, "\n"),
 		},
 	}
 	for _, tc := range tcs {
@@ -2422,7 +2455,10 @@ func ExamplePipe_Join() {
 func ExamplePipe_JQ() {
 	kernel := "Darwin"
 	arch := "x86_64"
-	query := fmt.Sprintf(".assets[] | select(.name | endswith(\"%s_%s.tar.gz\")).browser_download_url", kernel, arch)
+	query := fmt.Sprintf(`.assets[] | select(.name | endswith("%s_%s.tar.gz")).browser_download_url`,
+		kernel,
+		arch)
+
 	script.File("testdata/releases.json").JQ(query).Stdout()
 	// Output:
 	// "https://github.com/mbarley333/blackjack/releases/download/v0.3.3/blackjack_0.3.3_Darwin_x86_64.tar.gz"
